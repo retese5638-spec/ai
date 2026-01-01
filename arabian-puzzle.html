@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة الألغاز العربية - Arabian Puzzle Game</title>
+    <title>Arabian Puzzle - Enhanced Edition</title>
     <style>
         * {
             margin: 0;
@@ -13,333 +13,824 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            color: #eee;
+            overflow-x: hidden;
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            padding: 20px;
+            max-width: 1400px;
             width: 100%;
         }
 
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-        }
-
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .puzzle-item {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 15px;
-            padding: 20px;
-            color: white;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            min-height: 100px;
+        .game-area {
             display: flex;
-            align-items: center;
-            justify-content: center;
             flex-direction: column;
+            gap: 20px;
         }
 
-        .puzzle-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.1), rgba(255, 69, 0, 0.1));
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 140, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(255, 140, 0, 0.2);
         }
 
-        .puzzle-item.selected {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            transform: scale(1.05);
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #ff8c00, #ff6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
         }
 
-        .puzzle-item.correct {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            animation: bounce 0.6s ease;
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            text-align: center;
+            transition: all 0.3s ease;
         }
 
-        .puzzle-number {
+        .stat-box:hover {
+            background: rgba(255, 140, 0, 0.1);
+            border-color: rgba(255, 140, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
             font-size: 0.8em;
-            opacity: 0.9;
+            color: #aaa;
             margin-bottom: 5px;
         }
 
-        .puzzle-text {
-            font-size: 1em;
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ff8c00;
+        }
+
+        .game-board {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 140, 0, 0.2);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 700px;
+        }
+
+        .puzzle-tile {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #ff8c00, #ff6347);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .puzzle-tile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .puzzle-tile:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 140, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .puzzle-tile.selected {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .puzzle-tile.matched {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            animation: matchPulse 0.6s ease;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        @keyframes matchPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .puzzle-tile.hidden {
+            background: linear-gradient(135deg, #333, #555);
+            color: transparent;
         }
 
         .controls {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
             justify-content: center;
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
+            padding: 12px 24px;
             font-size: 1em;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8c00, #ff6347);
+            color: white;
         }
 
-        button:active {
-            transform: translateY(-1px);
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 140, 0, 0.5);
         }
 
-        .info-box {
-            background: #f0f4ff;
-            border-right: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: right;
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
-        .info-box p {
-            color: #333;
-            margin: 5px 0;
+        .btn-secondary {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #ff8c00;
+            border: 2px solid #ff8c00;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 140, 0, 0.2);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .leaderboard-panel {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 140, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(255, 140, 0, 0.2);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-title {
+            font-size: 1.3em;
+            color: #ff8c00;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .leaderboard-entry {
+            display: grid;
+            grid-template-columns: 30px 1fr 80px;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255, 140, 0, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #ff8c00;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-entry:hover {
+            background: rgba(255, 140, 0, 0.15);
+            transform: translateX(5px);
+        }
+
+        .leaderboard-entry.top-1 {
+            border-left-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .leaderboard-entry.top-2 {
+            border-left-color: #c0c0c0;
+            background: rgba(192, 192, 192, 0.05);
+        }
+
+        .leaderboard-entry.top-3 {
+            border-left-color: #cd7f32;
+            background: rgba(205, 127, 50, 0.05);
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #ff8c00;
+            font-size: 1.1em;
+        }
+
+        .name {
+            color: #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .score {
-            text-align: center;
-            font-size: 1.3em;
+            color: #ff8c00;
             font-weight: bold;
-            color: #667eea;
+            text-align: right;
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 140, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(255, 140, 0, 0.2);
+        }
+
+        .info-title {
+            font-size: 1.1em;
+            color: #ff8c00;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .info-text {
+            font-size: 0.9em;
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        .toggle-sound {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff8c00, #ff6347);
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toggle-sound:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(255, 140, 0, 0.5);
+        }
+
+        .toggle-sound.muted {
+            background: linear-gradient(135deg, #555, #333);
+            color: #aaa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 140, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content h2 {
+            font-size: 2em;
+            color: #ff8c00;
             margin-bottom: 20px;
         }
 
-        .message {
-            text-align: center;
+        .modal-content p {
+            color: #bbb;
+            margin-bottom: 10px;
             font-size: 1.1em;
-            margin-top: 20px;
-            min-height: 30px;
-            color: #4facfe;
-            font-weight: bold;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .player-name-input {
+            padding: 12px;
+            font-size: 1em;
+            border: 2px solid #ff8c00;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .player-name-input::placeholder {
+            color: #666;
         }
 
         .difficulty-selector {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
 
         .difficulty-btn {
-            padding: 8px 15px;
-            font-size: 0.9em;
-            background: #e0e0e0;
-            color: #333;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #ff8c00;
+            border-radius: 8px;
+            color: #ff8c00;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .difficulty-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #ff8c00;
+            color: #000;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .game-board {
+                max-width: 100%;
+            }
+
+            .sidebar {
+                grid-template-columns: 1fr 1fr;
+                display: grid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .stats-display {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .game-board {
+                grid-template-columns: repeat(3, 1fr);
+                padding: 15px;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
+    <button class="toggle-sound" id="soundToggle" title="Toggle Sound">🔊</button>
+
     <div class="container">
-        <h1>🧩 الألغاز العربية</h1>
-        <p class="subtitle">Arabian Puzzle Game</p>
+        <div class="game-area">
+            <div class="header">
+                <h1>🌙 Arabian Puzzle 🌙</h1>
+                <div class="stats-display">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Moves</div>
+                        <div class="stat-value" id="moves">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="timer">00:00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Matches</div>
+                        <div class="stat-value" id="matches">0/8</div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="info-box">
-            <p>🎯 مرحباً بك في لعبة الألغاز العربية</p>
-            <p>طابق الصور والكلمات العربية بشكل صحيح</p>
+            <div class="game-board" id="gameBoard"></div>
+
+            <div class="controls">
+                <button class="btn-primary" id="startBtn">Start Game</button>
+                <button class="btn-secondary" id="resetBtn">Reset</button>
+                <button class="btn-secondary" id="hintBtn">Hint</button>
+            </div>
         </div>
 
-        <div class="difficulty-selector">
-            <button class="difficulty-btn active" onclick="setDifficulty('easy')">سهل (Easy)</button>
-            <button class="difficulty-btn" onclick="setDifficulty('medium')">متوسط (Medium)</button>
-            <button class="difficulty-btn" onclick="setDifficulty('hard')">صعب (Hard)</button>
+        <div class="sidebar">
+            <div class="leaderboard-panel">
+                <div class="leaderboard-title">🏆 Leaderboard</div>
+                <div id="leaderboard"></div>
+            </div>
+
+            <div class="info-panel">
+                <div class="info-title">ℹ️ Game Info</div>
+                <div class="info-text">
+                    <p><strong>How to Play:</strong></p>
+                    <p>Match pairs of identical tiles by flipping them over. Clear all pairs to win!</p>
+                    <p><strong>Scoring:</strong></p>
+                    <p>Fewer moves = Higher score! Beat the clock and reach the leaderboard!</p>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="score">النقاط: <span id="scoreValue">0</span> / 9</div>
-
-        <div class="game-board" id="gameBoard">
-            <!-- Game items will be generated by JavaScript -->
+    <!-- Game Over Modal -->
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">You Win! 🎉</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <p>Moves Used: <span id="finalMoves">0</span></p>
+            <p>Time Taken: <span id="finalTime">00:00</span></p>
+            <input type="text" class="player-name-input" id="playerName" placeholder="Enter your name">
+            <div class="modal-buttons">
+                <button class="btn-primary" id="submitScoreBtn">Submit Score</button>
+                <button class="btn-secondary" id="playAgainBtn">Play Again</button>
+            </div>
         </div>
+    </div>
 
-        <div class="controls">
-            <button onclick="resetGame()">إعادة تعيين (Reset)</button>
-            <button onclick="shuffleBoard()">خلط (Shuffle)</button>
+    <!-- Difficulty Selector Modal -->
+    <div class="modal" id="difficultyModal">
+        <div class="modal-content">
+            <h2>Select Difficulty</h2>
+            <div class="difficulty-selector">
+                <button class="difficulty-btn active" data-difficulty="easy">Easy (4x4)</button>
+                <button class="difficulty-btn" data-difficulty="medium">Medium (5x5)</button>
+                <button class="difficulty-btn" data-difficulty="hard">Hard (6x6)</button>
+            </div>
+            <button class="btn-primary" id="confirmDifficultyBtn">Start Game</button>
         </div>
-
-        <div class="message" id="message"></div>
     </div>
 
     <script>
-        const puzzles = {
-            easy: [
-                { id: 1, arabic: 'التفاح', english: 'Apple', emoji: '🍎' },
-                { id: 2, arabic: 'الشمس', english: 'Sun', emoji: '☀️' },
-                { id: 3, arabic: 'البحر', english: 'Sea', emoji: '🌊' },
-                { id: 4, arabic: 'الأسد', english: 'Lion', emoji: '🦁' },
-                { id: 5, arabic: 'النجم', english: 'Star', emoji: '⭐' },
-                { id: 6, arabic: 'الزهرة', english: 'Flower', emoji: '🌸' },
-                { id: 7, arabic: 'السمكة', english: 'Fish', emoji: '🐠' },
-                { id: 8, arabic: 'الكتاب', english: 'Book', emoji: '📚' },
-                { id: 9, arabic: 'الموسيقى', english: 'Music', emoji: '🎵' }
-            ],
-            medium: [
-                { id: 1, arabic: 'الحاسوب', english: 'Computer', emoji: '💻' },
-                { id: 2, arabic: 'الطائرة', english: 'Airplane', emoji: '✈️' },
-                { id: 3, arabic: 'الجبل', english: 'Mountain', emoji: '⛰️' },
-                { id: 4, arabic: 'الهاتف', english: 'Phone', emoji: '📱' },
-                { id: 5, arabic: 'المجهر', english: 'Microscope', emoji: '🔬' },
-                { id: 6, arabic: 'البطريق', english: 'Penguin', emoji: '🐧' },
-                { id: 7, arabic: 'الثلج', english: 'Snow', emoji: '❄️' },
-                { id: 8, arabic: 'السماء', english: 'Sky', emoji: '🌤️' },
-                { id: 9, arabic: 'المكتبة', english: 'Library', emoji: '🏛️' }
-            ],
-            hard: [
-                { id: 1, arabic: 'الحضارة', english: 'Civilization', emoji: '🏰' },
-                { id: 2, arabic: 'المعرفة', english: 'Knowledge', emoji: '🧠' },
-                { id: 3, arabic: 'الفلسفة', english: 'Philosophy', emoji: '🤔' },
-                { id: 4, arabic: 'العلم', english: 'Science', emoji: '🔭' },
-                { id: 5, arabic: 'الابتكار', english: 'Innovation', emoji: '💡' },
-                { id: 6, arabic: 'التكنولوجيا', english: 'Technology', emoji: '🤖' },
-                { id: 7, arabic: 'الفن', english: 'Art', emoji: '🎨' },
-                { id: 8, arabic: 'الأدب', english: 'Literature', emoji: '📖' },
-                { id: 9, arabic: 'الموسيقى الكلاسيكية', english: 'Classical Music', emoji: '🎼' }
-            ]
+        // Game Configuration
+        const CONFIG = {
+            easy: { cols: 4, rows: 4, tiles: 16 },
+            medium: { cols: 5, rows: 5, tiles: 25 },
+            hard: { cols: 6, rows: 6, tiles: 36 }
         };
 
-        let currentDifficulty = 'easy';
-        let gameItems = [];
-        let selectedItem = null;
-        let score = 0;
-        let matches = {};
+        // Game State
+        let gameState = {
+            difficulty: 'easy',
+            tiles: [],
+            selected: [],
+            matched: 0,
+            moves: 0,
+            score: 0,
+            startTime: null,
+            elapsedTime: 0,
+            isPlaying: false,
+            playerName: 'Anonymous',
+            soundEnabled: true,
+            hints: 3
+        };
 
-        function setDifficulty(difficulty) {
-            currentDifficulty = difficulty;
-            document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            resetGame();
+        // Sound Manager
+        const SoundManager = {
+            audioContext: null,
+            init() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            },
+            play(frequency, duration, type = 'sine') {
+                if (!gameState.soundEnabled || !this.audioContext) return;
+                const now = this.audioContext.currentTime;
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+                
+                osc.frequency.value = frequency;
+                osc.type = type;
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                
+                osc.start(now);
+                osc.stop(now + duration);
+            },
+            playFlip() { this.play(800, 0.1, 'sine'); },
+            playMatch() { this.play(1200, 0.2, 'sine'); this.play(1500, 0.2, 'sine'); },
+            playWin() { this.play(1200, 0.1, 'sine'); this.play(1500, 0.1, 'sine'); this.play(1800, 0.2, 'sine'); },
+            playError() { this.play(300, 0.2, 'sine'); }
+        };
+
+        // Leaderboard Management
+        const Leaderboard = {
+            storageKey: 'arabian-puzzle-leaderboard',
+            get() {
+                const data = localStorage.getItem(this.storageKey);
+                return data ? JSON.parse(data) : [];
+            },
+            add(player) {
+                const leaderboard = this.get();
+                leaderboard.push(player);
+                leaderboard.sort((a, b) => b.score - a.score);
+                localStorage.setItem(this.storageKey, JSON.stringify(leaderboard.slice(0, 20)));
+                return leaderboard.slice(0, 20);
+            },
+            render() {
+                const leaderboard = this.get();
+                const container = document.getElementById('leaderboard');
+                container.innerHTML = leaderboard.map((entry, index) => `
+                    <div class="leaderboard-entry top-${Math.min(index + 1, 3)}">
+                        <div class="rank">${index + 1}</div>
+                        <div class="name">${entry.name}</div>
+                        <div class="score">${entry.score}</div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // Game Logic
+        function initializeGame() {
+            const config = CONFIG[gameState.difficulty];
+            gameState.tiles = generateTiles(config.tiles);
+            gameState.matched = 0;
+            gameState.moves = 0;
+            gameState.score = 0;
+            gameState.selected = [];
+            gameState.startTime = Date.now();
+            gameState.isPlaying = true;
+            renderBoard();
+            updateStats();
+            startTimer();
         }
 
-        function initGame() {
-            gameItems = [...puzzles[currentDifficulty]];
-            shuffleBoard();
-            renderBoard();
+        function generateTiles(count) {
+            const pairs = count / 2;
+            const symbols = ['🌟', '🌙', '⭐', '✨', '💫', '🌠', '🌌', '🪐', '🎆', '🎇', '✈️', '🚀', '🎯', '🎪', '🎨', '🎭', '🎬', '🎤'];
+            const tiles = [];
+            for (let i = 0; i < pairs; i++) {
+                const symbol = symbols[i % symbols.length];
+                tiles.push({ id: i, symbol, matched: false });
+                tiles.push({ id: i, symbol, matched: false });
+            }
+            return shuffle(tiles);
         }
 
-        function shuffleBoard() {
-            gameItems.sort(() => Math.random() - 0.5);
-            renderBoard();
+        function shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
         }
 
         function renderBoard() {
-            const gameBoard = document.getElementById('gameBoard');
-            gameBoard.innerHTML = '';
-
-            gameItems.forEach(item => {
-                const itemDiv = document.createElement('button');
-                itemDiv.className = 'puzzle-item';
-                if (matches[item.id]) {
-                    itemDiv.classList.add('correct');
-                }
-                if (selectedItem && selectedItem.id === item.id) {
-                    itemDiv.classList.add('selected');
-                }
-
-                itemDiv.innerHTML = `
-                    <div class="puzzle-number">${item.emoji}</div>
-                    <div class="puzzle-text">${item.arabic}</div>
-                `;
-
-                itemDiv.onclick = () => selectItem(item, itemDiv);
-                gameBoard.appendChild(itemDiv);
+            const board = document.getElementById('gameBoard');
+            const config = CONFIG[gameState.difficulty];
+            board.style.gridTemplateColumns = `repeat(${config.cols}, 1fr)`;
+            board.innerHTML = gameState.tiles.map((tile, index) => `
+                <div class="puzzle-tile ${tile.matched ? 'matched' : ''}" data-index="${index}">
+                    ${tile.matched ? tile.symbol : ''}
+                </div>
+            `).join('');
+            board.querySelectorAll('.puzzle-tile').forEach(el => {
+                el.addEventListener('click', () => selectTile(parseInt(el.dataset.index)));
             });
         }
 
-        function selectItem(item, element) {
-            if (matches[item.id]) return;
+        function selectTile(index) {
+            if (!gameState.isPlaying || gameState.selected.length >= 2) return;
+            if (gameState.tiles[index].matched) return;
+            if (gameState.selected.some(s => s === index)) return;
 
-            if (selectedItem) {
-                if (selectedItem.id === item.id) {
-                    selectedItem = null;
-                } else {
-                    checkMatch(selectedItem, item);
+            gameState.selected.push(index);
+            SoundManager.playFlip();
+            const tile = document.querySelector(`[data-index="${index}"]`);
+            tile.textContent = gameState.tiles[index].symbol;
+            tile.classList.add('selected');
+
+            if (gameState.selected.length === 2) {
+                gameState.moves++;
+                updateStats();
+                setTimeout(checkMatch, 800);
+            }
+        }
+
+        function checkMatch() {
+            const [idx1, idx2] = gameState.selected;
+            const tile1 = gameState.tiles[idx1];
+            const tile2 = gameState.tiles[idx2];
+
+            if (tile1.id === tile2.id) {
+                SoundManager.playMatch();
+                tile1.matched = true;
+                tile2.matched = true;
+                gameState.matched++;
+                gameState.score = Math.max(0, 1000 - gameState.moves * 10);
+                updateStats();
+
+                if (gameState.matched === gameState.tiles.length / 2) {
+                    endGame(true);
                 }
             } else {
-                selectedItem = item;
+                SoundManager.playError();
+                document.querySelectorAll('.puzzle-tile.selected').forEach(el => {
+                    el.classList.remove('selected');
+                    el.textContent = '';
+                });
             }
 
+            gameState.selected = [];
             renderBoard();
         }
 
-        function checkMatch(item1, item2) {
-            if (item1.id === item2.id) {
-                matches[item1.id] = true;
-                score++;
-                document.getElementById('scoreValue').textContent = score;
-                document.getElementById('message').textContent = '✅ صحيح! (Correct!)';
-                
-                if (score === 9) {
-                    document.getElementById('message').textContent = '🎉 مبروك! لقد فزت! (Congratulations! You Won!)';
+        function updateStats() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('moves').textContent = gameState.moves;
+            document.getElementById('matches').textContent = `${gameState.matched}/${gameState.tiles.length / 2}`;
+        }
+
+        function startTimer() {
+            setInterval(() => {
+                if (!gameState.isPlaying) return;
+                const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                gameState.elapsedTime = elapsed;
+                document.getElementById('timer').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function endGame(won) {
+            gameState.isPlaying = false;
+            SoundManager.playWin();
+            
+            const modal = document.getElementById('gameOverModal');
+            const title = document.getElementById('gameOverTitle');
+            title.textContent = won ? 'You Win! 🎉' : 'Game Over! 💔';
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalMoves').textContent = gameState.moves;
+            
+            const minutes = Math.floor(gameState.elapsedTime / 60);
+            const seconds = gameState.elapsedTime % 60;
+            document.getElementById('finalTime').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            modal.classList.add('active');
+        }
+
+        function useHint() {
+            if (gameState.hints <= 0 || !gameState.isPlaying) return;
+            gameState.hints--;
+            
+            const unmatched = gameState.tiles.reduce((acc, tile, idx) => {
+                if (!tile.matched && !gameState.selected.includes(idx)) {
+                    acc.push(idx);
                 }
-            } else {
-                document.getElementById('message').textContent = '❌ حاول مرة أخرى (Try Again)';
+                return acc;
+            }, []);
+
+            if (unmatched.length > 0) {
+                const hintIndex = unmatched[Math.floor(Math.random() * unmatched.length)];
+                const tile = document.querySelector(`[data-index="${hintIndex}"]`);
+                tile.textContent = gameState.tiles[hintIndex].symbol;
+                setTimeout(() => {
+                    tile.textContent = '';
+                }, 2000);
             }
-
-            selectedItem = null;
-            setTimeout(renderBoard, 800);
         }
 
-        function resetGame() {
-            score = 0;
-            matches = {};
-            selectedItem = null;
-            document.getElementById('scoreValue').textContent = '0';
-            document.getElementById('message').textContent = '';
-            initGame();
-        }
+        // Event Listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('difficultyModal').classList.add('active');
+        });
 
-        // Initialize game on page load
-        window.onload = initGame;
+        document.getElementById('confirmDifficultyBtn').addEventListener('click', () => {
+            document.getElementById('difficultyModal').classList.remove('active');
+            initializeGame();
+        });
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                gameState.difficulty = e.target.dataset.difficulty;
+            });
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            gameState.isPlaying = false;
+            document.getElementById('gameOverModal').classList.remove('active');
+            initializeGame();
+        });
+
+        document.getElementById('hintBtn').addEventListener('click', useHint);
+
+        document.getElementById('soundToggle').addEventListener('click', (e) => {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            e.target.classList.toggle('muted');
+            e.target.textContent = gameState.soundEnabled ? '🔊' : '🔇';
+        });
+
+        document.getElementById('submitScoreBtn').addEventListener('click', () => {
+            const playerName = document.getElementById('playerName').value || 'Anonymous';
+            gameState.playerName = playerName;
+            Leaderboard.add({
+                name: playerName,
+                score: gameState.score,
+                date: new Date().toLocaleDateString()
+            });
+            Leaderboard.render();
+            document.getElementById('gameOverModal').classList.remove('active');
+        });
+
+        document.getElementById('playAgainBtn').addEventListener('click', () => {
+            document.getElementById('gameOverModal').classList.remove('active');
+            document.getElementById('startBtn').click();
+        });
+
+        // Initialize
+        SoundManager.init();
+        Leaderboard.render();
     </script>
 </body>
 </html>
