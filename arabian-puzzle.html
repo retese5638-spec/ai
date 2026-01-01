@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الألغاز العربية - Arabian Puzzle Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .puzzle-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .puzzle-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .puzzle-item.selected {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transform: scale(1.05);
+        }
+
+        .puzzle-item.correct {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .puzzle-number {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .puzzle-text {
+            font-size: 1em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-right: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .info-box p {
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1.1em;
+            margin-top: 20px;
+            min-height: 30px;
+            color: #4facfe;
+            font-weight: bold;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧩 الألغاز العربية</h1>
+        <p class="subtitle">Arabian Puzzle Game</p>
+
+        <div class="info-box">
+            <p>🎯 مرحباً بك في لعبة الألغاز العربية</p>
+            <p>طابق الصور والكلمات العربية بشكل صحيح</p>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" onclick="setDifficulty('easy')">سهل (Easy)</button>
+            <button class="difficulty-btn" onclick="setDifficulty('medium')">متوسط (Medium)</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')">صعب (Hard)</button>
+        </div>
+
+        <div class="score">النقاط: <span id="scoreValue">0</span> / 9</div>
+
+        <div class="game-board" id="gameBoard">
+            <!-- Game items will be generated by JavaScript -->
+        </div>
+
+        <div class="controls">
+            <button onclick="resetGame()">إعادة تعيين (Reset)</button>
+            <button onclick="shuffleBoard()">خلط (Shuffle)</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const puzzles = {
+            easy: [
+                { id: 1, arabic: 'التفاح', english: 'Apple', emoji: '🍎' },
+                { id: 2, arabic: 'الشمس', english: 'Sun', emoji: '☀️' },
+                { id: 3, arabic: 'البحر', english: 'Sea', emoji: '🌊' },
+                { id: 4, arabic: 'الأسد', english: 'Lion', emoji: '🦁' },
+                { id: 5, arabic: 'النجم', english: 'Star', emoji: '⭐' },
+                { id: 6, arabic: 'الزهرة', english: 'Flower', emoji: '🌸' },
+                { id: 7, arabic: 'السمكة', english: 'Fish', emoji: '🐠' },
+                { id: 8, arabic: 'الكتاب', english: 'Book', emoji: '📚' },
+                { id: 9, arabic: 'الموسيقى', english: 'Music', emoji: '🎵' }
+            ],
+            medium: [
+                { id: 1, arabic: 'الحاسوب', english: 'Computer', emoji: '💻' },
+                { id: 2, arabic: 'الطائرة', english: 'Airplane', emoji: '✈️' },
+                { id: 3, arabic: 'الجبل', english: 'Mountain', emoji: '⛰️' },
+                { id: 4, arabic: 'الهاتف', english: 'Phone', emoji: '📱' },
+                { id: 5, arabic: 'المجهر', english: 'Microscope', emoji: '🔬' },
+                { id: 6, arabic: 'البطريق', english: 'Penguin', emoji: '🐧' },
+                { id: 7, arabic: 'الثلج', english: 'Snow', emoji: '❄️' },
+                { id: 8, arabic: 'السماء', english: 'Sky', emoji: '🌤️' },
+                { id: 9, arabic: 'المكتبة', english: 'Library', emoji: '🏛️' }
+            ],
+            hard: [
+                { id: 1, arabic: 'الحضارة', english: 'Civilization', emoji: '🏰' },
+                { id: 2, arabic: 'المعرفة', english: 'Knowledge', emoji: '🧠' },
+                { id: 3, arabic: 'الفلسفة', english: 'Philosophy', emoji: '🤔' },
+                { id: 4, arabic: 'العلم', english: 'Science', emoji: '🔭' },
+                { id: 5, arabic: 'الابتكار', english: 'Innovation', emoji: '💡' },
+                { id: 6, arabic: 'التكنولوجيا', english: 'Technology', emoji: '🤖' },
+                { id: 7, arabic: 'الفن', english: 'Art', emoji: '🎨' },
+                { id: 8, arabic: 'الأدب', english: 'Literature', emoji: '📖' },
+                { id: 9, arabic: 'الموسيقى الكلاسيكية', english: 'Classical Music', emoji: '🎼' }
+            ]
+        };
+
+        let currentDifficulty = 'easy';
+        let gameItems = [];
+        let selectedItem = null;
+        let score = 0;
+        let matches = {};
+
+        function setDifficulty(difficulty) {
+            currentDifficulty = difficulty;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            resetGame();
+        }
+
+        function initGame() {
+            gameItems = [...puzzles[currentDifficulty]];
+            shuffleBoard();
+            renderBoard();
+        }
+
+        function shuffleBoard() {
+            gameItems.sort(() => Math.random() - 0.5);
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+
+            gameItems.forEach(item => {
+                const itemDiv = document.createElement('button');
+                itemDiv.className = 'puzzle-item';
+                if (matches[item.id]) {
+                    itemDiv.classList.add('correct');
+                }
+                if (selectedItem && selectedItem.id === item.id) {
+                    itemDiv.classList.add('selected');
+                }
+
+                itemDiv.innerHTML = `
+                    <div class="puzzle-number">${item.emoji}</div>
+                    <div class="puzzle-text">${item.arabic}</div>
+                `;
+
+                itemDiv.onclick = () => selectItem(item, itemDiv);
+                gameBoard.appendChild(itemDiv);
+            });
+        }
+
+        function selectItem(item, element) {
+            if (matches[item.id]) return;
+
+            if (selectedItem) {
+                if (selectedItem.id === item.id) {
+                    selectedItem = null;
+                } else {
+                    checkMatch(selectedItem, item);
+                }
+            } else {
+                selectedItem = item;
+            }
+
+            renderBoard();
+        }
+
+        function checkMatch(item1, item2) {
+            if (item1.id === item2.id) {
+                matches[item1.id] = true;
+                score++;
+                document.getElementById('scoreValue').textContent = score;
+                document.getElementById('message').textContent = '✅ صحيح! (Correct!)';
+                
+                if (score === 9) {
+                    document.getElementById('message').textContent = '🎉 مبروك! لقد فزت! (Congratulations! You Won!)';
+                }
+            } else {
+                document.getElementById('message').textContent = '❌ حاول مرة أخرى (Try Again)';
+            }
+
+            selectedItem = null;
+            setTimeout(renderBoard, 800);
+        }
+
+        function resetGame() {
+            score = 0;
+            matches = {};
+            selectedItem = null;
+            document.getElementById('scoreValue').textContent = '0';
+            document.getElementById('message').textContent = '';
+            initGame();
+        }
+
+        // Initialize game on page load
+        window.onload = initGame;
+    </script>
+</body>
+</html>
